@@ -1,152 +1,264 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>好運椿椿｜圓周角與直徑探索任務</title>
-    <style>
-        /* --- 網頁樣式 (CSS) --- */
-        :root { --main-pink: #ffb7c5; --bg-color: #fff5f7; }
-        body { font-family: "Microsoft JhengHei", sans-serif; background-color: var(--bg-color); margin: 0; padding: 20px; }
-        .container { max-width: 1000px; margin: auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        h1 { color: #d63384; text-align: center; }
-        
-        /* 互動區域佈局 */
-        .main-layout { display: flex; gap: 20px; margin-top: 20px; flex-wrap: wrap; }
-        .canvas-area { flex: 1; min-width: 350px; border: 3px dashed var(--main-pink); border-radius: 15px; height: 400px; position: relative; display: flex; align-items: center; justify-content: center; background: #fff; }
-        .side-panel { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 15px; }
-
-        /* 按鈕與介面 */
-        .btn { padding: 12px 20px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        .primary-btn { background-color: var(--main-pink); color: white; width: 100%; }
-        .primary-btn:hover { background-color: #ff99aa; }
-        .sos-btn { background-color: #ffd166; color: #333; }
-        
-        /* 機器人區域 */
-        .chun-bot-box { position: fixed; bottom: 30px; right: 30px; z-index: 1000; display: flex; flex-direction: column; align-items: flex-end; }
-        .chat-bubble { background: white; border: 2px solid var(--main-pink); border-radius: 20px; padding: 15px; margin-bottom: 10px; max-width: 280px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); display: none; line-height: 1.6; font-size: 15px; position: relative; }
-        .chat-bubble::after { content: ''; position: absolute; bottom: -10px; right: 35px; border-width: 10px 10px 0; border-style: solid; border-color: white transparent transparent; }
-        .avatar-container { width: 90px; height: 90px; border-radius: 50%; border: 4px solid white; box-shadow: 0 0 15px var(--main-pink); overflow: hidden; cursor: pointer; transition: 0.3s; background: white; }
-        .avatar-container:hover { transform: scale(1.1) rotate(5deg); }
-        .avatar-img { width: 100%; height: 100%; object-fit: cover; }
-        
-        /* 動畫效果 */
-        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
-        .jump-animation { animation: bounce 0.5s ease 3; }
-        .emoji-layer { position: absolute; top: -40px; right: 20px; font-size: 30px; pointer-events: none; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>伸縮曲尺找直徑｜圓周角探索任務</title>
+  <style>
+    /* === 整合您原有的 style.css 並加入機器人樣式 === */
+    * { box-sizing: border-box; }
+    body { font-family: "Noto Serif TC", serif; background-color: #f8f4e8; color: #3d352e; line-height: 1.7; margin: 0; padding: 16px; }
+    .case-file-wrapper { max-width: 980px; margin: 16px auto; padding: 24px; background: #fff; border: 1px solid #d1c7b8; box-shadow: 0 8px 18px rgba(0,0,0,0.08); border-radius: 16px; position: relative; }
+    header { border-bottom: 2px double #c3b59f; padding-bottom: 10px; margin-bottom: 16px; position: relative; }
+    .case-stamp { position: absolute; right: 0; top: 0; padding: 4px 10px; border: 2px solid #b33a3a; color: #b33a3a; font-weight: bold; transform: rotate(7deg); background: rgba(255,250,240,0.96); }
+    h1 { font-size: 1.7rem; margin: 0; }
+    .hook-section { margin-bottom: 18px; }
+    .level-nav { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .level-badge { flex: 1; min-width: 80px; background: #f3ebe0; border-radius: 999px; padding: 6px 10px; display: flex; align-items: center; gap: 6px; border: 1px solid #d6c7b2; color: #7a6450; font-size: 0.9rem; cursor: pointer; }
+    .level-badge.active { background: #ffe0b3; border-color: #f39c12; color: #5d3a18; }
+    
+    .canvas-layout { display: flex; flex-direction: column; gap: 12px; }
+    @media (min-width: 768px) { .canvas-layout { flex-direction: row; } }
+    .canvas-box { flex: 1.35; background: #fdf8ee; border-radius: 16px; padding: 8px; border: 1px solid #e0d4c2; position: relative; }
+    #circleCanvas { display: block; width: 100%; height: auto; border-radius: 12px; border: 1px dashed #d3c1a6; background: #fffdf8; touch-action: none; }
+    .side-panel { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+    
+    /* 椿椿機器人浮動樣式 */
+    .chun-bot-box { position: fixed; bottom: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; align-items: flex-end; }
+    .chat-bubble { background: white; border: 2px solid #ffb7c5; border-radius: 15px; padding: 12px; margin-bottom: 8px; max-width: 250px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); display: none; font-size: 14px; color: #444; position: relative; }
+    .chat-bubble::after { content: ''; position: absolute; bottom: -10px; right: 25px; border-width: 10px 10px 0; border-style: solid; border-color: white transparent transparent; }
+    .bot-avatar-container { width: 85px; height: 85px; border-radius: 50%; border: 3px solid #ffb7c5; overflow: hidden; background: white; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+    .bot-avatar-container:hover { transform: scale(1.1); }
+    .bot-img { width: 100%; height: 100%; object-fit: cover; }
+    
+    /* 其他 UI 元素 (簡化版) */
+    .info-panel { padding: 10px; border-radius: 12px; background: #f5efe3; border: 1px solid #e1d5c0; font-size: 0.9rem; }
+    .tool-btn { background: #fff; border: 1px solid #ccc; border-radius: 6px; padding: 5px 12px; cursor: pointer; }
+    .primary-btn { background: #f39c12; color: #fff; border: none; padding: 8px 16px; border-radius: 999px; cursor: pointer; width: 100%; font-weight: bold; }
+    .secondary-btn { background: #e0d4c2; color: #5f4c3a; border: none; padding: 8px 16px; border-radius: 999px; cursor: pointer; }
+    .hidden { display: none; }
+    @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+    .jump { animation: bounce 0.5s ease 3; }
+  </style>
 </head>
 <body>
 
-<div class="container">
+  <div class="case-file-wrapper">
     <header>
-        <h1>🎯 探索直徑：圓周角偵探任務</h1>
-        <p>觀察當 $\angle ACB$ 變成直角時，弦 $AB$ 有什麼變化？</p>
+      <span class="case-stamp">案件 03</span>
+      <h1>🎯 伸縮曲尺找直徑：偵探任務</h1>
     </header>
 
-    <div class="main-layout">
-        <div class="canvas-area">
-            <div style="text-align: center; color: #888;">
-                <p>【此處連動您的圓形操作程式碼】</p>
-                <p>您可以點擊右側選項模擬操作</p>
-            </div>
-        </div>
-
-        <div class="side-panel">
-            <div style="background: #fff0f3; padding: 20px; border-radius: 15px;">
-                <h3>第 4 關：誰才是「真直徑」？</h3>
-                <p>技師發現 $\angle ACB$ 剛好是 $90^\circ$。請問 $AB$ 的性質是？</p>
-                <label style="display:block; margin-bottom:10px;"><input type="radio" name="q4" value="wrong1"> A. $AC$ 和 $BC$ 一定一樣長</label>
-                <label style="display:block; margin-bottom:10px;"><input type="radio" name="q4" value="correct"> B. $AB$ 是這個圓的直徑</label>
-                <label style="display:block; margin-bottom:15px;"><input type="radio" name="q4" value="wrong2"> C. 點 $C$ 一定在圓心</label>
-                <button class="btn primary-btn" onclick="checkMathAnswer()">送出我的判斷</button>
-            </div>
-            <button class="btn sos-btn" onclick="askTeacher('我卡住了，請給我一點提示。')">🆘 椿椿老師求救</button>
-        </div>
+    <div class="level-nav">
+      <div class="level-badge active" data-level="1">🕹️ 第 1 關</div>
+      <div class="level-badge" data-level="2">📐 第 2 關</div>
+      <div class="level-badge" data-level="3">🔁 第 3 關</div>
+      <div class="level-badge" data-level="4">💡 第 4 關</div>
     </div>
 
-    <div class="chun-bot-box">
-        <div id="chatBubble" class="chat-bubble"></div>
-        <div class="avatar-container" onclick="askTeacher('老師，我想更了解這個主題。')">
-            <img src="網頁首頁.jpg" alt="椿椿老師" class="avatar-img" id="teacherAvatar">
-            <div id="emojiLayer" class="emoji-layer"></div>
+    <div class="canvas-layout">
+      <div class="canvas-box">
+        <canvas id="circleCanvas"></canvas>
+        <div style="margin-top:10px; display:flex; gap:10px;">
+          <button id="toggleProtractorBtn" class="tool-btn">📐量角器</button>
+          <button id="sosBtn" class="tool-btn" style="background:#fff2c2">🆘 椿椿求救</button>
         </div>
-    </div>
-</div>
+      </div>
 
-<script>
-    /* --- 核心邏輯 (JavaScript) --- */
-    
-    // 您的 API KEY
-    const API_KEY = "gen-lang-client-0772758720"; 
+      <div class="side-panel">
+        <div class="info-panel">
+          <div id="statusMessage">拖曳圓周上的 A、B、C 點，感受曲尺的移動。</div>
+        </div>
+
+        <div class="level-content">
+          <h4 id="levelTitle">載入中...</h4>
+          <p id="levelDesc" style="font-size:0.9rem; color:#666;"></p>
+          
+          <div id="level4Question" class="hidden" style="background:#fff7e7; padding:15px; border-radius:10px; margin-top:10px;">
+            <p><strong>劇院應用題：</strong>當 ∠ACB 是直角時，燈軌 AB 最可能是？</p>
+            <label style="display:block"><input type="radio" name="q4" value="A"> A. 圓的直徑 (穿過圓心)</label>
+            <label style="display:block"><input type="radio" name="q4" value="B"> B. 普通的弦</label>
+            <button id="checkQ4Btn" class="primary-btn" style="margin-top:10px">送出答案</button>
+          </div>
+        </div>
+
+        <div class="level-buttons" style="margin-top:auto; display:flex; justify-content:space-between;">
+          <button id="resetLevelBtn" class="secondary-btn">🔄 重設</button>
+          <button id="nextLevelBtn" class="primary-btn" style="width:auto" disabled>下一關 ▶</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chun-bot-box">
+    <div id="chatBubble" class="chat-bubble"></div>
+    <div class="bot-avatar-container" onclick="askTeacher('老師，我需要一點指引。')">
+      <img src="網頁首頁.jpg" alt="椿椿老師" class="bot-img" id="botImg">
+    </div>
+  </div>
+
+  <script>
+    /* === 整合您原有的 script.js 邏輯 === */
+    const API_KEY = "gen-lang-client-0772758720"; // 您的金鑰
+    const canvas = document.getElementById("circleCanvas");
+    const ctx = canvas.getContext("2d");
+    let currentLevel = 1;
     let errorCount = 0;
+    
+    // 幾何設定
+    let cx, cy, radius;
+    let points = {
+      A: { angle: 0, color: "#c0392b" },
+      B: { angle: 2, color: "#2980b9" },
+      C: { angle: 4, color: "#27ae60" }
+    };
 
-    // 1. 顯示對話內容
-    function showMessage(text, isHappy = false) {
-        const bubble = document.getElementById('chatBubble');
-        const avatar = document.getElementById('teacherAvatar');
-        const emojis = document.getElementById('emojiLayer');
-        
+    // 1. 初始化畫布
+    function initCanvas() {
+      const dpr = window.devicePixelRatio || 1;
+      const size = canvas.parentElement.clientWidth;
+      canvas.width = size * dpr;
+      canvas.height = (size * 0.75) * dpr;
+      canvas.style.width = size + "px";
+      canvas.style.height = (size * 0.75) + "px";
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      cx = size / 2;
+      cy = (size * 0.75) / 2;
+      radius = size * 0.35;
+      draw();
+    }
+
+    // 2. 繪圖主程式
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // 畫圓
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, 0, Math.PI*2);
+      ctx.strokeStyle = "#8d6e63";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      const pA = { x: cx + radius*Math.cos(points.A.angle), y: cy + radius*Math.sin(points.A.angle) };
+      const pB = { x: cx + radius*Math.cos(points.B.angle), y: cy + radius*Math.sin(points.B.angle) };
+      const pC = { x: cx + radius*Math.cos(points.C.angle), y: cy + radius*Math.sin(points.C.angle) };
+
+      // 檢查是否接近直角 (90度)
+      const v1 = { x: pA.x - pC.x, y: pA.y - pC.y };
+      const v2 = { x: pB.x - pC.x, y: pB.y - pC.y };
+      const dot = v1.x * v2.x + v1.y * v2.y;
+      const mag = Math.sqrt(v1.x**2 + v1.y**2) * Math.sqrt(v2.x**2 + v2.y**2);
+      const angle = Math.acos(dot/mag) * (180/Math.PI);
+      const isRight = Math.abs(angle - 90) < 2;
+
+      // 畫曲尺
+      ctx.lineWidth = 8;
+      ctx.lineCap = "round";
+      ctx.strokeStyle = "#2980b9";
+      ctx.beginPath(); ctx.moveTo(pC.x, pC.y); ctx.lineTo(pA.x, pA.y); ctx.stroke();
+      ctx.strokeStyle = "#27ae60";
+      ctx.beginPath(); ctx.moveTo(pC.x, pC.y); ctx.lineTo(pB.x, pB.y); ctx.stroke();
+
+      // 畫弦 (直角時變紅)
+      ctx.lineWidth = isRight ? 5 : 2;
+      ctx.strokeStyle = isRight ? "#e53935" : "#6d4c41";
+      ctx.beginPath(); ctx.moveTo(pA.x, pA.y); ctx.lineTo(pB.x, pB.y); ctx.stroke();
+
+      // 畫點
+      [points.A, points.B, points.C].forEach(p => {
+        ctx.beginPath();
+        ctx.arc(cx + radius*Math.cos(p.angle), cy + radius*Math.sin(p.angle), 10, 0, Math.PI*2);
+        ctx.fillStyle = p.color;
+        ctx.fill();
+        ctx.strokeStyle = "#fff";
+        ctx.stroke();
+      });
+
+      // 自動過關判定 (第2關)
+      if(currentLevel === 2 && isRight) {
+        document.getElementById("nextLevelBtn").disabled = false;
+        document.getElementById("statusMessage").innerText = "太棒了！你做出直角了！";
+      }
+    }
+
+    // 3. AI 助教功能
+    async function askTeacher(query) {
+      const bubble = document.getElementById("chatBubble");
+      bubble.innerText = "椿椿老師思考中...";
+      bubble.style.display = "block";
+
+      const sysMsg = "你是一位國中數學老師『椿椿』。學生正在玩圓周角互動網頁。請用親切語氣引導學生，絕不給答案。";
+      
+      try {
+        const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            contents: [{parts: [{text: query}]}],
+            system_instruction: {parts: [{text: sysMsg}]}
+          })
+        });
+        const data = await resp.json();
+        const text = data.candidates[0].content.parts[0].text;
         bubble.innerText = text;
-        bubble.style.display = 'block';
-        
-        if (isHappy) {
-            avatar.parentElement.classList.add('jump-animation');
-            emojis.innerText = "✨😊";
-            setTimeout(() => {
-                avatar.parentElement.classList.remove('jump-animation');
-                emojis.innerText = "";
-            }, 3000);
-        }
+      } catch (e) {
+        bubble.innerText = "哎呀，老師連線出了一點問題，你先自己試試看？";
+      }
     }
 
-    // 2. 檢查學生答案
-    function checkMathAnswer() {
-        const selected = document.querySelector('input[name="q4"]:checked');
-        if (!selected) {
-            showMessage("請先選一個答案喔！");
-            return;
-        }
-
-        if (selected.value === 'correct') {
-            errorCount = 0;
-            showMessage("太棒了！你的觀察非常準確，這就是圓周角的重要性質喔！", true);
-        } else {
-            errorCount++;
-            if (errorCount >= 2) {
-                askTeacher("學生連續兩次答錯了，他現在很困惑。請用引導方式幫他，不要直接給答案。");
-            } else {
-                showMessage("唔...好像不是這樣。再觀察看看曲尺的對邊？");
-            }
-        }
+    // 4. 關卡切換邏輯
+    function setLevel(lvl) {
+      currentLevel = lvl;
+      document.querySelectorAll(".level-badge").forEach(b => b.classList.toggle("active", b.dataset.level == lvl));
+      const titles = ["", "第 1 關：先玩玩看", "第 2 關：找到直角", "第 3 關：多點驗證", "第 4 關：應用挑戰"];
+      const descs = ["", "隨便拖動 A、B、C，感受一下。", "試著讓 AB 線段變紅（也就是 ∠ACB 變直角）。", "移動 C 到別處，看看直角是否依然存在。", "完成下方的劇院題目。"];
+      document.getElementById("levelTitle").innerText = titles[lvl];
+      document.getElementById("levelDesc").innerText = descs[lvl];
+      document.getElementById("level4Question").classList.toggle("hidden", lvl !== 4);
+      document.getElementById("nextLevelBtn").disabled = (lvl !== 1); // 第一關預設可過
     }
 
-    // 3. 呼叫 Gemini AI
-    async function askTeacher(userPrompt) {
-        showMessage("椿椿老師正在思考如何引導你...");
-        
-        // 老師的人格設定
-        const sysInstruction = "你是一位親切的台灣國中數學老師『椿椿』。學生正在探索『當圓周角是 90 度時，其對應的弦是直徑』。規則：1.絕對不直接給答案。2.使用提問法引導。3.語氣要溫柔且有耐心。";
+    // 5. 事件監聽
+    let activePoint = null;
+    canvas.addEventListener("mousedown", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+      for (let key in points) {
+        const px = cx + radius*Math.cos(points[key].angle);
+        const py = cy + radius*Math.sin(points[key].angle);
+        if (Math.hypot(mx-px, my-py) < 20) { activePoint = key; break; }
+      }
+    });
+    window.addEventListener("mousemove", (e) => {
+      if (!activePoint) return;
+      const rect = canvas.getBoundingClientRect();
+      const dx = (e.clientX - rect.left) - cx;
+      const dy = (e.clientY - rect.top) - cy;
+      points[activePoint].angle = Math.atan2(dy, dx);
+      draw();
+    });
+    window.addEventListener("mouseup", () => activePoint = null);
 
-        try {
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: userPrompt }] }],
-                    system_instruction: { parts: [{ text: sysInstruction }] }
-                })
-            });
+    document.getElementById("checkQ4Btn").onclick = () => {
+      const sel = document.querySelector('input[name="q4"]:checked');
+      if (sel && sel.value === "A") {
+        document.getElementById("chatBubble").innerText = "完全正確！你真的是數學小偵探！";
+        document.getElementById("chatBubble").style.display = "block";
+        document.getElementById("botImg").parentElement.classList.add("jump");
+      } else {
+        errorCount++;
+        if(errorCount >= 2) askTeacher("學生在第4關選錯兩次了，請給他關於『直角對應直徑』的引導。");
+        else document.getElementById("statusMessage").innerText = "再想一下，直角對到的那條邊有什麼特性？";
+      }
+    };
 
-            const data = await response.json();
-            const aiText = data.candidates[0].content.parts[0].text;
-            showMessage(aiText);
-        } catch (error) {
-            console.error("AI 錯誤:", error);
-            showMessage("哎呀，椿椿老師現在稍微分心了，請再試一次或自己觀察看看？");
-        }
-    }
-</script>
+    document.getElementById("sosBtn").onclick = () => askTeacher("我目前在第 " + currentLevel + " 關，我卡住了。");
+    document.getElementById("nextLevelBtn").onclick = () => setLevel(currentLevel + 1);
+    document.getElementById("resetLevelBtn").onclick = () => location.reload();
 
+    window.onload = () => { initCanvas(); setLevel(1); };
+    window.onresize = initCanvas;
+  </script>
 </body>
 </html>
